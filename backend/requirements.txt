@@ -10,3 +10,4 @@ PyJWT
 httpx
 pytest
 pytest-asyncio
+email-validator

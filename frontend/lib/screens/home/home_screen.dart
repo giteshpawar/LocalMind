@@ -2,13 +2,20 @@ import 'package:flutter/material.dart';
 
 import '../../services/api_service.dart';
 
-class HomeScreen extends StatefulWidget {
-const HomeScreen({
-  super.key,
-  this.apiService,
-});
+import '../../models/user.dart';
+import '../../services/auth_service.dart';
 
-final ApiService? apiService;
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({
+    super.key,
+    required this.user,
+    required this.authService,
+    ApiService? apiService,
+  }) : _apiService = apiService;
+
+  final User user;
+  final AuthService authService;
+  final ApiService? _apiService;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -25,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
 
-    _apiService = widget.apiService ?? ApiService();
+    _apiService = widget._apiService ?? ApiService();
 
     _checkBackend();
   }

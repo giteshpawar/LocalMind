@@ -50,10 +50,6 @@ def get_db() -> Generator[Session, None, None]:
 
 
 def initialize_database() -> None:
-    """
-    Create tables registered with SQLAlchemy metadata.
+    import app.models  # noqa: F401
 
-    During the early project foundation this may create no tables because
-    application models have not yet been added.
-    """
     Base.metadata.create_all(bind=engine)

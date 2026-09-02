@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     app_name: str = "LocalMind API"
     app_version: str = "0.1.0"
     environment: str = "development"
+    secret_key: str = "localmind-development-secret-change-me"
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 1440
 
     api_prefix: str = "/api"
 

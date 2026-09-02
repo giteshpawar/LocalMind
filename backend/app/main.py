@@ -7,6 +7,8 @@ from fastapi.responses import JSONResponse
 from app.core.config import settings
 from app.core.database import initialize_database
 
+from app.api.auth import router as auth_router
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -21,7 +23,10 @@ app = FastAPI(
     version=settings.app_version,
     debug=settings.debug,
 )
-
+app.include_router(
+    auth_router,
+    prefix=settings.api_prefix,
+)
 
 app.add_middleware(
     CORSMiddleware,
