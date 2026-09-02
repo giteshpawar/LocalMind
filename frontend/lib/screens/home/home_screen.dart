@@ -1,9 +1,10 @@
+
 import 'package:flutter/material.dart';
 
 import '../../services/api_service.dart';
-
 import '../../models/user.dart';
 import '../../services/auth_service.dart';
+import '../auth/login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -80,6 +81,23 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _logout() async {
+    await widget.authService.logout();
+
+    if (!mounted) {
+      return;
+    }
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (_) => LoginScreen(
+          authService: widget.authService,
+        ),
+      ),
+      (_) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -143,6 +161,14 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ],
+        ),
+        const Spacer(),
+        IconButton(
+          tooltip: 'Logout',
+          onPressed: _logout,
+          icon: const Icon(
+            Icons.logout,
+          ),
         ),
       ],
     );

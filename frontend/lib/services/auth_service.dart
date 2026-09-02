@@ -3,6 +3,8 @@ import 'package:dio/dio.dart';
 import '../models/user.dart';
 import 'api_service.dart';
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 class AuthResult {
   const AuthResult({
     required this.token,
@@ -16,15 +18,37 @@ class AuthResult {
 class AuthService {
   AuthService({
     ApiService? apiService,
-  }) : _apiService = apiService ?? ApiService();
+    FlutterSecureStorage? secureStorage,
+  })  : _apiService = apiService ?? ApiService(),
+        _secureStorage = secureStorage ?? const FlutterSecureStorage();
 
   final ApiService _apiService;
+  final FlutterSecureStorage _secureStorage;
+
+  static const String _tokenKey = 'localmind_access_token';
 
   String? _accessToken;
 
   String? get accessToken => _accessToken;
 
   bool get isAuthenticated => _accessToken != null;
+
+  Future<void> restoreSession() async {
+  final token = await _secureStorage.read(
+    key: _tokenKey,
+  );
+
+  if (token == null || token.isEmpty) {
+    return;
+  }
+
+  _accessToken = token;
+
+  _secureStorage.write(
+  key: _tokenKey,
+  value: token,
+);
+}
 
   Future<AuthResult> register({
     required String name,
@@ -95,29 +119,44 @@ class AuthService {
     }
   }
 
-  void logout() {
-    _accessToken = null;
-  }
+  Future<void> logout() async {
+  _accessToken = null;
 
-  AuthResult _parseAuthResponse(Map<String, dynamic>? data) {
-    if (data == null) {
-      throw const AuthException('Authentication response was empty.');
-    }
+  await _secureStorage.delete(
+    key: _tokenKey,
+  );
+}
 
-    final token = data['access_token'];
-    final userData = data['user'];
-
-    if (token is! String || userData is! Map<String, dynamic>) {
-      throw const AuthException('Authentication response was invalid.');
-    }
-
-    _accessToken = token;
-
-    return AuthResult(
-      token: token,
-      user: User.fromJson(userData),
+Future<AuthResult> _parseAuthResponse(
+  Map<String, dynamic>? data,
+) async {
+  if (data == null) {
+    throw const AuthException(
+      'Authentication response was empty.',
     );
   }
+
+  final token = data['access_token'];
+  final userData = data['user'];
+
+  if (token is! String || userData is! Map<String, dynamic>) {
+    throw const AuthException(
+      'Authentication response was invalid.',
+    );
+  }
+
+  _accessToken = token;
+
+  await _secureStorage.write(
+    key: _tokenKey,
+    value: token,
+  );
+
+  return AuthResult(
+    token: token,
+    user: User.fromJson(userData),
+  );
+}
 
   String _extractMessage(DioException error) {
     final data = error.response?.data;
